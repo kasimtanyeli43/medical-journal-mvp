@@ -6,5 +6,4 @@ export const dynamic = 'force-dynamic'
 
 export const { GET, POST } = createRouteHandler({
     router: ourFileRouter,
-    config: { isDev: true }, // Enable verbose logs
 })
