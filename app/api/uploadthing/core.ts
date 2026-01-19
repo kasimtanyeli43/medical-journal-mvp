@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 const f = createUploadthing()
 
 export const ourFileRouter = {
-    pdfUploader: f({ pdf: { maxFileSize: '10MB', maxFileCount: 1 } })
+    pdfUploader: f({ pdf: { maxFileSize: '8MB', maxFileCount: 1 } })
         .middleware(async () => {
             const session = await getServerSession()
 
