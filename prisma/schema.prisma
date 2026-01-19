@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  AUTHOR
+  EDITOR
+  REVIEWER
+}
+
+enum ArticleStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  REVISION_REQUESTED
+  ACCEPTED
+  REJECTED
+  PUBLISHED
+}
+
+enum ReviewStatus {
+  PENDING
+  COMPLETED
+}
+
+enum ReviewRecommendation {
+  ACCEPT
+  REJECT
+  MAJOR_REVISION
+  MINOR_REVISION
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          UserRole
+  affiliation   String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  articles      Article[]  @relation("AuthorArticles")
+  reviews       Review[]   @relation("ReviewerReviews")
+  
+  @@index([email])
+  @@index([role])
+}
+
+model Article {
+  id            String         @id @default(cuid())
+  title         String
+  abstract      String         @db.Text
+  keywords      String[]
+  authors       String[]       // Array of author names
+  authorId      String
+  pdfUrl        String?
+  pdfKey        String?        // UploadThing file key
+  status        ArticleStatus  @default(SUBMITTED)
+  submittedAt   DateTime       @default(now())
+  publishedAt   DateTime?
+  issueId       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  // Relations
+  author        User           @relation("AuthorArticles", fields: [authorId], references: [id])
+  reviews       Review[]
+  issue         Issue?         @relation(fields: [issueId], references: [id])
+  
+  @@index([authorId])
+  @@index([status])
+  @@index([submittedAt])
+}
+
+model Review {
+  id              String                @id @default(cuid())
+  articleId       String
+  reviewerId      String
+  comments        String                @db.Text
+  confidential    String?               @db.Text  // Comments only for editor
+  recommendation  ReviewRecommendation
+  status          ReviewStatus          @default(PENDING)
+  submittedAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  
+  // Relations
+  article         Article               @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  reviewer        User                  @relation("ReviewerReviews", fields: [reviewerId], references: [id])
+  
+  @@index([articleId])
+  @@index([reviewerId])
+  @@index([status])
+}
+
+model Issue {
+  id            String    @id @default(cuid())
+  volume        Int
+  number        Int
+  year          Int
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  articles      Article[]
+  
+  @@unique([volume, number, year])
+  @@index([year])
+}

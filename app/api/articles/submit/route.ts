@@ -1,0 +1,53 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { prisma } from '@/lib/db'
+import { sendEmail, articleSubmittedEmail } from '@/lib/email'
+
+export async function POST(req: NextRequest) {
+    try {
+        const session = await getServerSession()
+
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const body = await req.json()
+        const { title, abstract, keywords, authors, pdfUrl, pdfKey } = body
+
+        if (!title || !abstract || !keywords || !authors || !pdfUrl) {
+            return NextResponse.json(
+                { error: 'Lütfen tüm gerekli alanları doldurun' },
+                { status: 400 }
+            )
+        }
+
+        // Create article
+        const article = await prisma.article.create({
+            data: {
+                title,
+                abstract,
+                keywords,
+                authors,
+                pdfUrl,
+                pdfKey,
+                authorId: session.user.id,
+                status: 'SUBMITTED',
+            },
+        })
+
+        // Send email notification
+        const emailContent = articleSubmittedEmail(session.user.name, title)
+        await sendEmail({
+            to: session.user.email,
+            ...emailContent,
+        })
+
+        return NextResponse.json({ success: true, article })
+    } catch (error) {
+        console.error('Article submission error:', error)
+        return NextResponse.json(
+            { error: 'Makale gönderimi sırasında bir hata oluştu' },
+            { status: 500 }
+        )
+    }
+}

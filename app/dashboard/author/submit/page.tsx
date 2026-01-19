@@ -1,0 +1,212 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useUploadThing } from '@/lib/uploadthing'
+import { Upload } from 'lucide-react'
+
+export default function SubmitArticlePage() {
+    const router = useRouter()
+    const [formData, setFormData] = useState({
+        title: '',
+        abstract: '',
+        keywords: '',
+        authors: '',
+    })
+    const [file, setFile] = useState<File | null>(null)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
+
+    const { startUpload, isUploading } = useUploadThing('pdfUploader')
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const selectedFile = e.target.files[0]
+            if (selectedFile.type !== 'application/pdf') {
+                setError('Lütfen sadece PDF dosyası yükleyin')
+                return
+            }
+            if (selectedFile.size > 10 * 1024 * 1024) {
+                setError('Dosya boyutu 10MB\'dan küçük olmalıdır')
+                return
+            }
+            setFile(selectedFile)
+            setError('')
+        }
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setError('')
+
+        if (!file) {
+            setError('Lütfen PDF dosyası yükleyin')
+            return
+        }
+
+        setLoading(true)
+
+        try {
+            // Upload PDF first
+            const uploadResult = await startUpload([file])
+
+            if (!uploadResult || uploadResult.length === 0) {
+                throw new Error('Dosya yükleme başarısız')
+            }
+
+            const pdfUrl = uploadResult[0].url
+            const pdfKey = uploadResult[0].key
+
+            // Submit article data
+            const res = await fetch('/api/articles/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...formData,
+                    keywords: formData.keywords.split(',').map((k) => k.trim()),
+                    authors: formData.authors.split(',').map((a) => a.trim()),
+                    pdfUrl,
+                    pdfKey,
+                }),
+            })
+
+            const data = await res.json()
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Makale gönderimi başarısız')
+            }
+
+            router.push('/dashboard/author')
+            router.refresh()
+        } catch (err: any) {
+            setError(err.message || 'Bir hata oluştu')
+            setLoading(false)
+        }
+    }
+
+    return (
+        <div>
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Yeni Makale Gönder</h1>
+                <p className="text-gray-600 mt-2">Makalenizin bilgilerini doldurun ve PDF dosyanızı yükleyin</p>
+            </div>
+
+            <div className="card max-w-3xl">
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                        <label htmlFor="title" className="label">
+                            Makale Başlığı *
+                        </label>
+                        <input
+                            id="title"
+                            type="text"
+                            value={formData.title}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                            className="input-field"
+                            required
+                            placeholder="COVID-19 Pnömonisinde Yüksek Çözünürlüklü BT Bulguları"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="authors" className="label">
+                            Yazarlar * <span className="text-xs text-gray-500">(Virgülle ayırın)</span>
+                        </label>
+                        <input
+                            id="authors"
+                            type="text"
+                            value={formData.authors}
+                            onChange={(e) => setFormData({ ...formData, authors: e.target.value })}
+                            className="input-field"
+                            required
+                            placeholder="Dr. Ahmet Yılmaz, Dr. Zeynep Arslan"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="abstract" className="label">
+                            Özet *
+                        </label>
+                        <textarea
+                            id="abstract"
+                            value={formData.abstract}
+                            onChange={(e) => setFormData({ ...formData, abstract: e.target.value })}
+                            className="input-field"
+                            rows={6}
+                            required
+                            placeholder="Makalenizin özetini buraya yazın..."
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="keywords" className="label">
+                            Anahtar Kelimeler * <span className="text-xs text-gray-500">(Virgülle ayırın)</span>
+                        </label>
+                        <input
+                            id="keywords"
+                            type="text"
+                            value={formData.keywords}
+                            onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+                            className="input-field"
+                            required
+                            placeholder="COVID-19, Pnömoni, HRCT, Radyoloji"
+                        />
+                    </div>
+
+                    <div>
+                        <label htmlFor="pdf" className="label">
+                            PDF Dosyası * <span className="text-xs text-gray-500">(Maksimum 10MB)</span>
+                        </label>
+                        <div className="mt-1">
+                            <label
+                                htmlFor="pdf"
+                                className="flex items-center justify-center w-full px-4 py-6 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-primary-500 transition-colors"
+                            >
+                                <div className="text-center">
+                                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                    {file ? (
+                                        <p className="text-sm text-gray-700">{file.name}</p>
+                                    ) : (
+                                        <p className="text-sm text-gray-600">PDF dosyanızı yüklemek için tıklayın</p>
+                                    )}
+                                </div>
+                            </label>
+                            <input
+                                id="pdf"
+                                type="file"
+                                accept=".pdf"
+                                onChange={handleFileChange}
+                                className="hidden"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                        <button
+                            type="submit"
+                            disabled={loading || isUploading}
+                            className="btn-primary flex-1"
+                        >
+                            {loading || isUploading ? 'Gönderiliyor...' : 'Makale Gönder'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => router.back()}
+                            className="btn-outline"
+                            disabled={loading || isUploading}
+                        >
+                            İptal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    )
+}
