@@ -67,4 +67,7 @@ const handler = NextAuth({
     secret: process.env.NEXTAUTH_SECRET,
 })
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export { handler as GET, handler as POST }
