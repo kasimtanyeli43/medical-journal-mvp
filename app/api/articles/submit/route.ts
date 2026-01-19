@@ -36,11 +36,13 @@ export async function POST(req: NextRequest) {
         })
 
         // Send email notification
-        const emailContent = articleSubmittedEmail(session.user.name, title)
-        await sendEmail({
-            to: session.user.email,
-            ...emailContent,
-        })
+        const emailContent = articleSubmittedEmail(session.user.name || 'User', title)
+        if (session.user.email) {
+            await sendEmail({
+                to: session.user.email,
+                ...emailContent,
+            })
+        }
 
         return NextResponse.json({ success: true, article })
     } catch (error) {
