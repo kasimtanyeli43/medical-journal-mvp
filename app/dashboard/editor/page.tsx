@@ -2,6 +2,9 @@ import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 function getStatusBadge(status: string) {
     const badges = {
         SUBMITTED: 'badge badge-submitted',

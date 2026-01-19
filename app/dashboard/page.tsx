@@ -3,6 +3,9 @@ import { getCurrentUser } from '@/lib/auth'
 import Link from 'next/link'
 import { LogOut, BookOpen } from 'lucide-react'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
     const user = await getCurrentUser()
 

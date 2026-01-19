@@ -2,6 +2,9 @@ import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { Search, Download } from 'lucide-react'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default async function ArticlesPage() {
     const articles = await prisma.article.findMany({
         where: { status: 'PUBLISHED' },

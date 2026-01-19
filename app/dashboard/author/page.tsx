@@ -3,6 +3,9 @@ import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { FileText, Clock, CheckCircle, XCircle } from 'lucide-react'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 function getStatusBadge(status: string) {
     const badges = {
         SUBMITTED: 'badge badge-submitted',
