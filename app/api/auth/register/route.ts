@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
+import { sendEmail, welcomeEmail } from '@/lib/email'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -50,6 +51,19 @@ export async function POST(req: NextRequest) {
                 affiliation,
             },
         })
+
+        // Send welcome email
+        try {
+            const emailTemplate = welcomeEmail(user.name || 'Kullanıcı')
+            await sendEmail({
+                to: user.email,
+                subject: emailTemplate.subject,
+                html: emailTemplate.html,
+            })
+        } catch (emailError) {
+            console.error('Welcome email failed:', emailError)
+            // Don't fail the registration if email fails
+        }
 
         return NextResponse.json({
             message: 'Kayıt başarılı',
