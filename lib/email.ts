@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
 
@@ -21,6 +21,13 @@ export async function sendEmail({
             console.log(`Subject: ${subject}`)
             console.log(`Body: ${html.substring(0, 100)}...`)
             return { success: true, messageId: 'test-mode' }
+        }
+
+        if (!resend) {
+            console.log('📧 [NO API KEY] Email would be sent (mock):')
+            console.log(`To: ${to}`)
+            console.log(`Subject: ${subject}`)
+            return { success: true, messageId: 'mock-sent' }
         }
 
         const data = await resend.emails.send({
