@@ -124,3 +124,19 @@ export function decisionEmail(
     `,
     }
 }
+
+export function welcomeEmail(userName: string) {
+    return {
+        subject: 'Tıp Dergisine Hoş Geldiniz',
+        html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #0369a1;">Aramıza Hoş Geldiniz!</h2>
+        <p>Sayın ${userName},</p>
+        <p>Tıp Dergisi sistemine kaydınız başarıyla oluşturulmuştur.</p>
+        <p>Hesabınızla giriş yaparak makale gönderebilir veya size atanan görevleri takip edebilirsiniz.</p>
+        <p><a href="${process.env.NEXTAUTH_URL}/login" style="background: #0369a1; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; border-radius: 5px; margin-top: 10px;">Giriş Yap</a></p>
+        <p>Saygılarımızla,<br>Tıp Dergisi Ekibi</p>
+      </div>
+    `,
+    }
+}
