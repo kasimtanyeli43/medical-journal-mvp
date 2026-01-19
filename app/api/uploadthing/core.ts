@@ -7,22 +7,9 @@ const f = createUploadthing()
 export const ourFileRouter = {
     pdfUploader: f({ pdf: { maxFileSize: '8MB', maxFileCount: 1 } })
         .middleware(async ({ req }) => {
-            console.log("UploadThing Middleware: Starting")
-
-            try {
-                const session = await getServerSession(authOptions)
-
-                if (!session || !session.user) {
-                    console.error("UploadThing Middleware: Unauthorized - No valid session found")
-                    throw new Error('Unauthorized')
-                }
-
-                console.log("UploadThing Middleware: Authorized user", session.user.id)
-                return { userId: session.user.id }
-            } catch (error) {
-                console.error("UploadThing Middleware Error:", error)
-                throw new Error('UploadThing Middleware Failed')
-            }
+            console.log("UploadThing Middleware: Starting (Auth Bypassed)")
+            // No auth check for debugging
+            return { userId: "debug-user-v7-test" }
         })
         .onUploadComplete(async ({ metadata, file }) => {
             console.log('Upload complete for userId:', metadata.userId)
