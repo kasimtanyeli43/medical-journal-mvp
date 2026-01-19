@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUploadThing } from '@/lib/uploadthing'
 import { Upload } from 'lucide-react'
 
 export default function SubmitArticlePage() {
@@ -16,8 +15,6 @@ export default function SubmitArticlePage() {
     const [file, setFile] = useState<File | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-
-    const { startUpload, isUploading } = useUploadThing('pdfUploader')
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -47,15 +44,21 @@ export default function SubmitArticlePage() {
         setLoading(true)
 
         try {
-            // Upload PDF first
-            const uploadResult = await startUpload([file])
+            // Upload PDF first using FormData
+            const formData = new FormData()
+            formData.append('file', file)
 
-            if (!uploadResult || uploadResult.length === 0) {
+            const uploadRes = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            })
+
+            if (!uploadRes.ok) {
                 throw new Error('Dosya yükleme başarısız')
             }
 
-            const pdfUrl = uploadResult[0].url
-            const pdfKey = uploadResult[0].key
+            const uploadData = await uploadRes.json()
+            const pdfUrl = uploadData.url
 
             // Submit article data
             const res = await fetch('/api/articles/submit', {
@@ -66,7 +69,7 @@ export default function SubmitArticlePage() {
                     keywords: formData.keywords.split(',').map((k) => k.trim()),
                     authors: formData.authors.split(',').map((a) => a.trim()),
                     pdfUrl,
-                    pdfKey,
+                    pdfKey: pdfUrl, // Using URL as key for now
                 }),
             })
 
@@ -191,16 +194,17 @@ export default function SubmitArticlePage() {
                     <div className="flex gap-4">
                         <button
                             type="submit"
-                            disabled={loading || isUploading}
+                            disabled={loading}
                             className="btn-primary flex-1"
                         >
-                            {loading || isUploading ? 'Gönderiliyor...' : 'Makale Gönder'}
+                            {loading ? 'Gönderiliyor...' : 'Makale Gönder'}
                         </button>
                         <button
                             type="button"
                             onClick={() => router.back()}
                             className="btn-outline"
-                            disabled={loading || isUploading}
+                            disabled={loading}
+                        >
                         >
                             İptal
                         </button>
