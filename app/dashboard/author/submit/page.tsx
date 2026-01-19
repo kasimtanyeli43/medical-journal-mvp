@@ -45,12 +45,12 @@ export default function SubmitArticlePage() {
 
         try {
             // Upload PDF first using FormData
-            const formData = new FormData()
-            formData.append('file', file)
+            const uploadFormData = new FormData()
+            uploadFormData.append('file', file)
 
             const uploadRes = await fetch('/api/upload', {
                 method: 'POST',
-                body: formData,
+                body: uploadFormData,
             })
 
             if (!uploadRes.ok) {
@@ -65,9 +65,10 @@ export default function SubmitArticlePage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...formData,
-                    keywords: formData.keywords.split(',').map((k) => k.trim()),
-                    authors: formData.authors.split(',').map((a) => a.trim()),
+                    title: formData.title,
+                    abstract: formData.abstract,
+                    keywords: formData.keywords.split(',').map((k: string) => k.trim()),
+                    authors: formData.authors.split(',').map((a: string) => a.trim()),
                     pdfUrl,
                     pdfKey: pdfUrl, // Using URL as key for now
                 }),
@@ -204,7 +205,6 @@ export default function SubmitArticlePage() {
                             onClick={() => router.back()}
                             className="btn-outline"
                             disabled={loading}
-                        >
                         >
                             İptal
                         </button>
