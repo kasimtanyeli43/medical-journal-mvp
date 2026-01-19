@@ -1,6 +1,8 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { FileText, Users, Inbox, AlertCircle } from 'lucide-react'
+import { StatCard } from '@/components/ui/StatCard'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -58,22 +60,35 @@ export default async function EditorDashboard() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="card">
-                    <p className="text-2xl font-bold">{stats.total}</p>
-                    <p className="text-sm text-gray-600">Toplam Makale</p>
-                </div>
-                <div className="card">
-                    <p className="text-2xl font-bold text-blue-600">{stats.submitted}</p>
-                    <p className="text-sm text-gray-600">Yeni Gönderimler</p>
-                </div>
-                <div className="card">
-                    <p className="text-2xl font-bold text-yellow-600">{stats.underReview}</p>
-                    <p className="text-sm text-gray-600">Değerlendirmede</p>
-                </div>
-                <div className="card">
-                    <p className="text-2xl font-bold text-orange-600">{stats.needsDecision}</p>
-                    <p className="text-sm text-gray-600">Karar Bekliyor</p>
-                </div>
+                <StatCard
+                    title="Toplam Makale"
+                    value={stats.total}
+                    icon={<FileText className="w-6 h-6" />}
+                    trend={{ value: 5, isPositive: true }}
+                />
+                <StatCard
+                    title="Yeni Gönderimler"
+                    value={stats.submitted}
+                    icon={<Inbox className="w-6 h-6" />}
+                    iconBgColor="bg-blue-50"
+                    iconColor="text-blue-600"
+                    subtitle="İşlem bekleyen"
+                />
+                <StatCard
+                    title="Değerlendirmede"
+                    value={stats.underReview}
+                    icon={<Users className="w-6 h-6" />}
+                    iconBgColor="bg-yellow-50"
+                    iconColor="text-yellow-600"
+                />
+                <StatCard
+                    title="Karar Bekliyor"
+                    value={stats.needsDecision}
+                    icon={<AlertCircle className="w-6 h-6" />}
+                    iconBgColor="bg-orange-50"
+                    iconColor="text-orange-600"
+                    subtitle="Hakem süreci tamamlandı"
+                />
             </div>
 
             {/* Articles Table */}

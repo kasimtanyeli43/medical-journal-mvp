@@ -1,17 +1,12 @@
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
+import { FileText, Clock, CheckCircle } from 'lucide-react'
+import { StatCard } from '@/components/ui/StatCard'
+import { ArticleCard } from '@/components/ui/ArticleCard'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
-
-function getStatusBadge(status: string) {
-    const badges = {
-        PENDING: 'badge bg-yellow-100 text-yellow-800',
-        COMPLETED: 'badge bg-green-100 text-green-800',
-    }
-    return badges[status as keyof typeof badges] || 'badge'
-}
 
 export default async function ReviewerDashboard() {
     const user = await requireRole(['REVIEWER'])
@@ -35,92 +30,84 @@ export default async function ReviewerDashboard() {
         <div>
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">Hakem Paneli</h1>
-                <p className="text-gray-600 mt-2">Size atanan makaleleri değerlendirin</p>
+                <p className="text-gray-600 mt-2">Size atanan makaleleri bilimsel kriterlere göre değerlendirin</p>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="card">
-                    <p className="text-2xl font-bold">{reviews.length}</p>
-                    <p className="text-sm text-gray-600">Toplam Atama</p>
-                </div>
-                <div className="card">
-                    <p className="text-2xl font-bold text-yellow-600">{pending.length}</p>
-                    <p className="text-sm text-gray-600">Bekleyen</p>
-                </div>
-                <div className="card">
-                    <p className="text-2xl font-bold text-green-600">{completed.length}</p>
-                    <p className="text-sm text-gray-600">Tamamlanan</p>
-                </div>
+                <StatCard
+                    title="Toplam Atama"
+                    value={reviews.length}
+                    icon={<FileText className="w-6 h-6" />}
+                />
+                <StatCard
+                    title="Bekleyen"
+                    value={pending.length}
+                    icon={<Clock className="w-6 h-6" />}
+                    iconBgColor="bg-yellow-50"
+                    iconColor="text-yellow-600"
+                    subtitle="Değerlendirme bekleniyor"
+                />
+                <StatCard
+                    title="Tamamlanan"
+                    value={completed.length}
+                    icon={<CheckCircle className="w-6 h-6" />}
+                    iconBgColor="bg-green-50"
+                    iconColor="text-green-600"
+                />
             </div>
 
             {/* Pending Reviews */}
-            {pending.length > 0 && (
-                <div className="card mb-6">
-                    <h2 className="text-xl font-bold mb-6">Bekleyen Değerlendirmeler</h2>
-                    <div className="space-y-4">
+            <div className="mb-10">
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-yellow-600" />
+                    Bekleyen Değerlendirmeler
+                </h2>
+                {pending.length > 0 ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {pending.map((review) => (
-                            <div
+                            <ArticleCard
                                 key={review.id}
-                                className="border border-yellow-200 bg-yellow-50 rounded-lg p-4"
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold text-gray-900 mb-2">{review.article.title}</h3>
-                                        <p className="text-sm text-gray-600 mb-3">
-                                            Yazar: {review.article.author.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            Atanma: {new Date(review.createdAt).toLocaleDateString('tr-TR')}
-                                        </p>
-                                    </div>
-                                    <Link
-                                        href={`/dashboard/reviewer/review/${review.id}`}
-                                        className="btn-primary ml-4"
-                                    >
-                                        İncele & Değerlendir
-                                    </Link>
-                                </div>
-                            </div>
+                                id={review.article.id}
+                                title={review.article.title}
+                                author={review.article.author.name || 'Unknown'}
+                                date={review.createdAt.toISOString()}
+                                status="PENDING"
+                                category="Değerlendirme Bekliyor"
+                                href={`/dashboard/reviewer/review/${review.id}`}
+                                showStatus={false}
+                            />
                         ))}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="bg-white rounded-lg p-8 text-center border border-gray-200 text-gray-500">
+                        Bekleyen değerlendirmeniz bulunmuyor.
+                    </div>
+                )}
+            </div>
 
             {/* Completed Reviews */}
-            <div className="card">
-                <h2 className="text-xl font-bold mb-6">Tamamlanan Değerlendirmeler</h2>
+            <div>
+                <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    Tamamlanan Değerlendirmeler
+                </h2>
 
                 {completed.length === 0 ? (
                     <p className="text-gray-600 text-center py-8">Henüz tamamlanmış değerlendirme yok</p>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {completed.map((review) => (
-                            <div
+                            <ArticleCard
                                 key={review.id}
-                                className="border border-gray-200 rounded-lg p-4"
-                            >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold text-gray-900 mb-2">{review.article.title}</h3>
-                                        <p className="text-sm text-gray-600 mb-3">
-                                            Yazar: {review.article.author.name}
-                                        </p>
-                                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                                            <span>Tamamlanma: {review.submittedAt ? new Date(review.submittedAt).toLocaleDateString('tr-TR') : 'N/A'}</span>
-                                            <span className="badge bg-gray-100 text-gray-800">
-                                                {review.recommendation === 'ACCEPT'
-                                                    ? 'Kabul'
-                                                    : review.recommendation === 'REJECT'
-                                                        ? 'Red'
-                                                        : review.recommendation === 'MAJOR_REVISION'
-                                                            ? 'Büyük Revizyon'
-                                                            : 'Küçük Revizyon'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                id={review.article.id}
+                                title={review.article.title}
+                                author={review.article.author.name || 'Unknown'}
+                                date={review.submittedAt ? new Date(review.submittedAt).toISOString() : new Date().toISOString()}
+                                status={review.recommendation || 'COMPLETED'}
+                                category="Tamamlandı"
+                                showStatus={true}
+                            />
                         ))}
                     </div>
                 )}
