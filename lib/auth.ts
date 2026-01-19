@@ -1,8 +1,9 @@
 import { getServerSession } from 'next-auth/next'
 import { redirect } from 'next/navigation'
+import { authOptions } from '@/lib/auth-options'
 
 export async function getSession() {
-    return await getServerSession()
+    return await getServerSession(authOptions)
 }
 
 export async function getCurrentUser() {
