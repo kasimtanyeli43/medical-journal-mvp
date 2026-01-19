@@ -3,6 +3,9 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/db'
 import { sendEmail, articleSubmittedEmail } from '@/lib/email'
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
     try {
         const session = await getServerSession()
