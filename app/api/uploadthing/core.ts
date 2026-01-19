@@ -1,17 +1,20 @@
 import { createUploadthing, type FileRouter } from 'uploadthing/next'
 import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth-options'
 
 const f = createUploadthing()
 
 export const ourFileRouter = {
     pdfUploader: f({ pdf: { maxFileSize: '8MB', maxFileCount: 1 } })
         .middleware(async () => {
-            const session = await getServerSession()
+            const session = await getServerSession(authOptions)
 
             if (!session?.user) {
+                console.error("UploadThing Middleware: Unauthorized (No Session)")
                 throw new Error('Unauthorized')
             }
 
+            console.log("UploadThing Middleware: Authorized user", session.user.id)
             return { userId: session.user.id }
         })
         .onUploadComplete(async ({ metadata, file }) => {
