@@ -30,7 +30,7 @@ export async function sendEmail({
             html,
         })
 
-        return { success: true, messageId: data.id }
+        return { success: true, messageId: data?.data?.id || 'sent' }
     } catch (error) {
         console.error('Failed to send email:', error)
         return { success: false, error }
