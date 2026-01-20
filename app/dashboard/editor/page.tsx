@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { FileText, Users, Inbox, AlertCircle } from 'lucide-react'
 import { StatCard } from '@/components/ui/StatCard'
+import { AssignReviewerButton } from '@/components/AssignReviewerButton'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -37,6 +38,7 @@ export default async function EditorDashboard() {
     const articles = await prisma.article.findMany({
         include: {
             author: true,
+            reviewer: true,
             reviews: true,
         },
         orderBy: { submittedAt: 'desc' },
@@ -125,10 +127,14 @@ export default async function EditorDashboard() {
                                     <td className="px-4 py-4 text-sm text-gray-600">
                                         {new Date(article.submittedAt).toLocaleDateString('tr-TR')}
                                     </td>
-                                    <td className="px-4 py-4 text-right">
+                                    <td className="px-4 py-4 text-right space-x-2">
+                                        <AssignReviewerButton
+                                            articleId={article.id}
+                                            currentReviewerId={article.reviewerId}
+                                        />
                                         <Link
                                             href={`/dashboard/editor/article/${article.id}`}
-                                            className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                                            className="btn-outline text-sm"
                                         >
                                             Detay
                                         </Link>

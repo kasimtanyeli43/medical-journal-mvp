@@ -140,3 +140,11 @@ export function welcomeEmail(userName: string) {
     `,
     }
 }
+
+
+export function reviewerAssignedEmail({ reviewer, article, author }: { reviewer: any; article: any; author: any }) {
+  return {
+    subject: 'Yeni Ýnceleme Talebi',
+    html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #2563eb;">Merhaba ,</h2><p>Size bir makale inceleme talebi atandý:</p><div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;"><h3 style="margin-top: 0;"></h3><p><strong>Yazar:</strong> </p></div><p>Lütfen sisteme giriþ yaparak makalenizi inceleyin:</p><a href="/dashboard/reviewer" style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Ýncele</a></div>`
+  }
+}

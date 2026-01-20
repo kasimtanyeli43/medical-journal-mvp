@@ -49,8 +49,10 @@ model User {
   updatedAt     DateTime  @updatedAt
   
   // Relations
-  articles      Article[]  @relation("AuthorArticles")
-  reviews       Review[]   @relation("ReviewerReviews")
+  articles          Article[]       @relation("AuthorArticles")
+  reviews           Review[]        @relation("ReviewerReviews")
+  reviewingArticles Article[]       @relation("ReviewerArticles")
+  notifications     Notification[]
   
   @@index([email])
   @@index([role])
@@ -69,15 +71,19 @@ model Article {
   submittedAt   DateTime       @default(now())
   publishedAt   DateTime?
   issueId       String?
+  reviewerId    String?        // Assigned reviewer
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   
   // Relations
   author        User           @relation("AuthorArticles", fields: [authorId], references: [id])
+  reviewer      User?          @relation("ReviewerArticles", fields: [reviewerId], references: [id])
   reviews       Review[]
   issue         Issue?         @relation(fields: [issueId], references: [id])
+  notifications Notification[]
   
   @@index([authorId])
+  @@index([reviewerId])
   @@index([status])
   @@index([submittedAt])
 }
@@ -117,4 +123,24 @@ model Issue {
   
   @@unique([volume, number, year])
   @@index([year])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // "ARTICLE_ASSIGNED", "REVIEW_SUBMITTED", "DECISION_MADE", etc.
+  title     String
+  message   String   @db.Text
+  
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  
+  read      Boolean  @default(false)
+  link      String?  // Optional link to navigate to
+  createdAt DateTime @default(now())
+  
+  @@index([userId, read])
+  @@index([createdAt])
 }

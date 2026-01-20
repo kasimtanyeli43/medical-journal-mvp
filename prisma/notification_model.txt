@@ -1,0 +1,20 @@
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   // "ARTICLE_ASSIGNED", "REVIEW_SUBMITTED", "DECISION_MADE", etc.
+  title     String
+  message   String   @db.Text
+  
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  
+  read      Boolean  @default(false)
+  link      String?  // Optional link to navigate to
+  createdAt DateTime @default(now())
+  
+  @@index([userId, read])
+  @@index([createdAt])
+}
