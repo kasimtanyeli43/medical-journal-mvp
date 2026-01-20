@@ -113,7 +113,9 @@ export default async function EditorDashboard() {
                             {articles.map((article) => (
                                 <tr key={article.id} className="hover:bg-gray-50">
                                     <td className="px-4 py-4">
-                                        <div className="font-medium text-gray-900 max-w-md truncate">{article.title}</div>
+                                        <Link href={`/articles/${article.id}`} className="font-medium text-gray-900 hover:text-blue-600 block">
+                                            {article.title}
+                                        </Link>
                                     </td>
                                     <td className="px-4 py-4 text-sm text-gray-600">{article.author.name}</td>
                                     <td className="px-4 py-4">

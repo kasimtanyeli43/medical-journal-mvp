@@ -74,7 +74,7 @@ export default async function ReviewerDashboard() {
                                 date={review.createdAt.toISOString()}
                                 status="PENDING"
                                 category="Değerlendirme Bekliyor"
-                                href={`/dashboard/reviewer/review/${review.id}`}
+                                href={`/dashboard/reviewer/review/${review.article.id}`}
                                 showStatus={false}
                             />
                         ))}

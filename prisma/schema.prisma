@@ -92,9 +92,9 @@ model Review {
   id              String                @id @default(cuid())
   articleId       String
   reviewerId      String
-  comments        String                @db.Text
+  comments        String?               @db.Text
   confidential    String?               @db.Text  // Comments only for editor
-  recommendation  ReviewRecommendation
+  recommendation  ReviewRecommendation?
   status          ReviewStatus          @default(PENDING)
   submittedAt     DateTime?
   createdAt       DateTime              @default(now())

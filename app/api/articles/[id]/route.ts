@@ -62,3 +62,55 @@ export async function GET(
         )
     }
 }
+
+export async function PATCH(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const session = await getServerSession(authOptions)
+
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const data = await request.json()
+
+        // Find article
+        const article = await prisma.article.findUnique({
+            where: { id: params.id }
+        })
+
+        if (!article) {
+            return NextResponse.json({ error: 'Article not found' }, { status: 404 })
+        }
+
+        // Only author can edit, and only if not PUBLISHED (or maybe allow edits if revision requested)
+        // For MVP, allow edits if author
+        if (article.authorId !== session.user.id) {
+            return NextResponse.json({ error: 'Permission denied' }, { status: 403 })
+        }
+
+        // Update article
+        const updatedArticle = await prisma.article.update({
+            where: { id: params.id },
+            data: {
+                title: data.title,
+                abstract: data.abstract,
+                keywords: data.keywords,
+                pdfUrl: data.pdfUrl,
+                // If status was REVISION_REQUESTED, maybe change back to SUBMITTED or UNDER_REVIEW?
+                // For now, let's keep status as is or update if specifically requested
+                status: data.status || article.status
+            }
+        })
+
+        return NextResponse.json({ success: true, article: updatedArticle })
+    } catch (error) {
+        console.error('Update article error:', error)
+        return NextResponse.json(
+            { error: 'Failed to update article' },
+            { status: 500 }
+        )
+    }
+}

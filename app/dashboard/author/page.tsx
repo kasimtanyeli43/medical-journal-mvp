@@ -103,6 +103,7 @@ export default async function AuthorDashboard() {
                                 date={article.submittedAt.toISOString()}
                                 status={article.status}
                                 category={article.keywords[0] || 'Genel Tıp'}
+                                href={`/articles/${article.id}`}
                             />
                         ))}
                     </div>

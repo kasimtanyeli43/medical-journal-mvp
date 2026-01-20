@@ -51,28 +51,40 @@ export async function POST(
             )
         }
 
-        // Update article with reviewer and change status
-        await prisma.article.update({
-            where: { id: params.id },
-            data: {
-                reviewerId,
-                status: 'UNDER_REVIEW'
-            }
+        // Use transaction to ensure data integrity
+        await prisma.$transaction(async (tx) => {
+            // 1. Create a pending review record
+            const review = await tx.review.create({
+                data: {
+                    articleId: article.id,
+                    reviewerId: reviewerId,
+                    status: 'PENDING'
+                }
+            })
+
+            // 2. Update article with reviewer and change status
+            await tx.article.update({
+                where: { id: params.id },
+                data: {
+                    reviewerId,
+                    status: 'UNDER_REVIEW'
+                }
+            })
+
+            // 3. Create notification for reviewer
+            await tx.notification.create({
+                data: {
+                    userId: reviewerId,
+                    type: 'ARTICLE_ASSIGNED',
+                    title: 'Yeni Makale Atandı',
+                    message: `"${article.title}" makalesi incelemeniz için atandı.`,
+                    articleId: article.id,
+                    link: `/dashboard/reviewer/review/${article.id}` // Correct Link using Article ID as per previous fix
+                }
+            })
         })
 
-        // Create notification for reviewer
-        await prisma.notification.create({
-            data: {
-                userId: reviewerId,
-                type: 'ARTICLE_ASSIGNED',
-                title: 'Yeni Makale Atandı',
-                message: `"${article.title}" makalesi incelemeniz için atandı.`,
-                articleId: article.id,
-                link: `/dashboard/reviewer/review/${article.id}`
-            }
-        })
-
-        // Send email to reviewer
+        // Send email (outside transaction)
         if (reviewer.email) {
             await sendEmail({
                 to: reviewer.email,
