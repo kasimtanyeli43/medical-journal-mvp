@@ -1,7 +1,11 @@
+'use client'
+
 import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
 import { ArrowLeft, Check, X, Clock, UserCheck, UserX } from 'lucide-react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,21 +38,53 @@ function getRoleText(role: string) {
     return role
 }
 
-export default async function UsersManagementPage() {
-    await requireRole(['EDITOR'])
+function UserManagementClient({ initialUsers }: { initialUsers: any[] }) {
+    const router = useRouter()
+    const [loading, setLoading] = useState<string | null>(null)
 
-    const users = await prisma.user.findMany({
-        orderBy: { createdAt: 'desc' },
-        where: {
-            role: {
-                in: ['AUTHOR', 'REVIEWER']
+    const handleApprove = async (userId: string) => {
+        setLoading(userId)
+        try {
+            const res = await fetch(`/api/users/${userId}/approve`, {
+                method: 'POST'
+            })
+            if (res.ok) {
+                router.refresh()
+            } else {
+                alert('Onaylama başarısız oldu')
             }
+        } catch (error) {
+            console.error(error)
+            alert('Bir hata oluştu')
+        } finally {
+            setLoading(null)
         }
-    })
+    }
 
-    const pendingUsers = users.filter(u => u.approvalStatus === 'PENDING')
-    const approvedUsers = users.filter(u => u.approvalStatus === 'APPROVED')
-    const rejectedUsers = users.filter(u => u.approvalStatus === 'REJECTED')
+    const handleReject = async (userId: string) => {
+        setLoading(userId)
+        try {
+            const res = await fetch(`/api/users/${userId}/reject`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: '' })
+            })
+            if (res.ok) {
+                router.refresh()
+            } else {
+                alert('Reddetme başarısız oldu')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Bir hata oluştu')
+        } finally {
+            setLoading(null)
+        }
+    }
+
+    const pendingUsers = initialUsers.filter(u => u.approvalStatus === 'PENDING')
+    const approvedUsers = initialUsers.filter(u => u.approvalStatus === 'APPROVED')
+    const rejectedUsers = initialUsers.filter(u => u.approvalStatus === 'REJECTED')
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -124,24 +160,22 @@ export default async function UsersManagementPage() {
                                         </td>
                                         <td className="px-6 py-4 text-sm">
                                             <div className="flex items-center gap-2">
-                                                <form action={`/api/users/${user.id}/approve`} method="POST">
-                                                    <button
-                                                        type="submit"
-                                                        className="inline-flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                                                    >
-                                                        <Check className="w-4 h-4" />
-                                                        Onayla
-                                                    </button>
-                                                </form>
-                                                <form action={`/api/users/${user.id}/reject`} method="POST">
-                                                    <button
-                                                        type="submit"
-                                                        className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                        Reddet
-                                                    </button>
-                                                </form>
+                                                <button
+                                                    onClick={() => handleApprove(user.id)}
+                                                    disabled={loading === user.id}
+                                                    className="inline-flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                                                >
+                                                    <Check className="w-4 h-4" />
+                                                    {loading === user.id ? 'Bekle...' : 'Onayla'}
+                                                </button>
+                                                <button
+                                                    onClick={() => handleReject(user.id)}
+                                                    disabled={loading === user.id}
+                                                    className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                    Reddet
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -167,7 +201,7 @@ export default async function UsersManagementPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            {users.map((user) => (
+                            {initialUsers.map((user) => (
                                 <tr key={user.id} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500">{user.email}</td>
@@ -184,4 +218,25 @@ export default async function UsersManagementPage() {
             </div>
         </div>
     )
+}
+
+export default async function UsersManagementPage() {
+    await requireRole(['EDITOR'])
+
+    const users = await prisma.user.findMany({
+        orderBy: { createdAt: 'desc' },
+        where: {
+            role: {
+                in: ['AUTHOR', 'REVIEWER']
+            }
+        }
+    })
+
+    const serializedUsers = users.map(u => ({
+        ...u,
+        createdAt: u.createdAt.toISOString(),
+        updatedAt: u.updatedAt.toISOString()
+    }))
+
+    return <UserManagementClient initialUsers={serializedUsers} />
 }
