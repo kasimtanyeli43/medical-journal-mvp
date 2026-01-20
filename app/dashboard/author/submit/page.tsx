@@ -19,8 +19,13 @@ export default function SubmitArticlePage() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const selectedFile = e.target.files[0]
-            if (selectedFile.type !== 'application/pdf') {
-                setError('Lütfen sadece PDF dosyası yükleyin')
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            ]
+            if (!allowedTypes.includes(selectedFile.type)) {
+                setError('Lütfen sadece PDF, DOC veya DOCX dosyası yükleyin')
                 return
             }
             if (selectedFile.size > 10 * 1024 * 1024) {
@@ -37,7 +42,7 @@ export default function SubmitArticlePage() {
         setError('')
 
         if (!file) {
-            setError('Lütfen PDF dosyası yükleyin')
+            setError('Lütfen dosya yükleyin')
             return
         }
 
@@ -165,7 +170,7 @@ export default function SubmitArticlePage() {
 
                     <div>
                         <label htmlFor="pdf" className="label">
-                            PDF Dosyası * <span className="text-xs text-gray-500">(Maksimum 10MB)</span>
+                            Makale Dosyası * <span className="text-xs text-gray-500">(Maksimum 10MB)</span>
                         </label>
                         <div className="mt-1">
                             <label
@@ -177,14 +182,14 @@ export default function SubmitArticlePage() {
                                     {file ? (
                                         <p className="text-sm text-gray-700">{file.name}</p>
                                     ) : (
-                                        <p className="text-sm text-gray-600">PDF dosyanızı yüklemek için tıklayın</p>
+                                        <p className="text-sm text-gray-600">Dosyanızı yüklemek için tıklayın (PDF, DOC, DOCX)</p>
                                     )}
                                 </div>
                             </label>
                             <input
                                 id="pdf"
                                 type="file"
-                                accept=".pdf"
+                                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                                 onChange={handleFileChange}
                                 className="hidden"
                                 required

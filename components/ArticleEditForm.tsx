@@ -175,7 +175,7 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
             {/* File Upload */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Makale Dosyası (PDF)
+                    Makale Dosyası * (Maksimum 10MB)
                 </label>
 
                 {currentPdfUrl && !file ? (
