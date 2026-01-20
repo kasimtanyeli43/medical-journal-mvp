@@ -42,7 +42,7 @@ export function StatCard({
                             <span>{trend.isPositive ? '↑' : '↓'}</span>
                             <span>{trend.value}%</span>
                             <span className="text-gray-400 font-normal ml-1 text-xs">
-                                {trend.label || 'vs last month'}
+                                {trend.label || 'geçen aya göre'}
                             </span>
                         </div>
                     )}
