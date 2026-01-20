@@ -30,17 +30,30 @@ export function ArticleCard({
     compact = false
 }: ArticleCardProps) {
 
-    // Status badge logic
+    // Status badge logic - handles both Turkish text and English codes
     const getStatusStyle = (status: string) => {
-        switch (status) {
-            case 'SUBMITTED': return 'bg-blue-100 text-blue-800'
-            case 'UNDER_REVIEW': return 'bg-yellow-100 text-yellow-800'
-            case 'ACCEPTED': return 'bg-green-100 text-green-800'
-            case 'REJECTED': return 'bg-red-100 text-red-800'
-            case 'PUBLISHED': return 'bg-purple-100 text-purple-800'
-            case 'REVISION_REQUESTED': return 'bg-orange-100 text-orange-800'
-            default: return 'bg-gray-100 text-gray-800'
+        const statusLower = status.toLowerCase()
+
+        if (status === 'SUBMITTED' || statusLower.includes('gönderildi')) {
+            return 'bg-blue-100 text-blue-800'
         }
+        if (status === 'UNDER_REVIEW' || statusLower.includes('inceleniyor')) {
+            return 'bg-yellow-100 text-yellow-800'
+        }
+        if (status === 'ACCEPTED' || statusLower.includes('kabul')) {
+            return 'bg-green-100 text-green-800'
+        }
+        if (status === 'REJECTED' || statusLower.includes('red')) {
+            return 'bg-red-100 text-red-800'
+        }
+        if (status === 'PUBLISHED' || statusLower.includes('yayınlandı')) {
+            return 'bg-purple-100 text-purple-800'
+        }
+        if (status === 'REVISION_REQUESTED' || statusLower.includes('revizyon')) {
+            return 'bg-orange-100 text-orange-800'
+        }
+
+        return 'bg-gray-100 text-gray-800'
     }
 
     const formatStatus = (s: string) => s.replace('_', ' ')
