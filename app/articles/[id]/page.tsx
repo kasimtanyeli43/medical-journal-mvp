@@ -130,23 +130,6 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
                                 ))}
                             </div>
                         </div>
-
-                        {/* Document Viewer */}
-                        {article.pdfUrl && (
-                            <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-                                <h2 className="text-xl font-bold text-gray-900 mb-4">Makaleyi Oku</h2>
-                                <div className="bg-gray-100 rounded-lg overflow-hidden border border-gray-300" style={{ height: '800px' }}>
-                                    <iframe
-                                        src={`https://docs.google.com/viewer?url=${encodeURIComponent(article.pdfUrl)}&embedded=true`}
-                                        className="w-full h-full border-0"
-                                        title={article.title}
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Dosya görüntülenemiyorsa &quot;PDF İndir&quot; butonunu kullanın.
-                                </p>
-                            </div>
-                        )}
                     </div>
 
                     {/* Sidebar */}
@@ -203,6 +186,23 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
                         </div>
                     </div>
                 </div>
+
+                {/* Document Viewer - Full Width */}
+                {article.pdfUrl && (
+                    <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100 mt-8">
+                        <h2 className="text-xl font-bold text-gray-900 mb-4">Makaleyi Oku</h2>
+                        <div className="bg-gray-100 rounded-lg overflow-hidden border border-gray-300" style={{ height: '800px' }}>
+                            <iframe
+                                src={`https://docs.google.com/viewer?url=${encodeURIComponent(article.pdfUrl)}&embedded=true`}
+                                className="w-full h-full border-0"
+                                title={article.title}
+                            />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2">
+                            Dosya görüntülenemiyorsa &quot;PDF İndir&quot; butonunu kullanın.
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     )
