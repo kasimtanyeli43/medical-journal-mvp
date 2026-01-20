@@ -127,8 +127,13 @@ export default function HomePage() {
                         </p>
                     </div>
                     <div className="text-center pt-4 border-t border-gray-800">
-                        <p className="text-xs text-gray-500 font-light tracking-wide">
-                            Designed by <span className="text-purple-400/80 font-medium">Kasım Tanyeli</span>
+                        <p className="text-xs text-gray-500 font-light tracking-wide flex items-center justify-center gap-2">
+                            Designed by
+                            <img
+                                src="/kasim-logo.png"
+                                alt="Kasım Tanyeli"
+                                className="h-4 inline-block opacity-70 hover:opacity-100 transition-opacity"
+                            />
                         </p>
                     </div>
                 </div>
