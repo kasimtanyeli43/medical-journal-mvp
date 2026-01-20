@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, FileText, Download } from 'lucide-react'
+import { ArrowLeft, FileText, Download, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 
 interface Article {
@@ -18,12 +18,23 @@ interface Article {
     }
 }
 
+interface Review {
+    id: string
+    status: 'PENDING' | 'COMPLETED'
+    recommendation: string | null
+    comments: string | null
+    confidentialComments: string | null
+    submittedAt: Date | null
+}
+
 export default function ReviewArticlePage({ params }: { params: { id: string } }) {
     const router = useRouter()
     const [article, setArticle] = useState<Article | null>(null)
+    const [review, setReview] = useState<Review | null>(null)
     const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [error, setError] = useState('')
+    const [showForm, setShowForm] = useState(false)
 
     const [formData, setFormData] = useState({
         recommendation: '',
@@ -32,17 +43,32 @@ export default function ReviewArticlePage({ params }: { params: { id: string } }
     })
 
     useEffect(() => {
-        fetchArticle()
+        fetchData()
     }, [params.id])
 
-    async function fetchArticle() {
+    async function fetchData() {
         try {
-            const res = await fetch(`/api/articles/${params.id}`)
-            if (res.ok) {
-                const data = await res.json()
-                setArticle(data.article)
+            // Fetch article
+            const articleRes = await fetch(`/api/articles/${params.id}`)
+            if (articleRes.ok) {
+                const articleData = await articleRes.json()
+                setArticle(articleData.article)
             } else {
                 setError('Makale yüklenemedi')
+                setLoading(false)
+                return
+            }
+
+            // Fetch review
+            const reviewRes = await fetch(`/api/articles/${params.id}/review`)
+            if (reviewRes.ok) {
+                const reviewData = await reviewRes.json()
+                setReview(reviewData.review)
+
+                // If review is pending, show form immediately
+                if (!reviewData.review || reviewData.review.status === 'PENDING') {
+                    setShowForm(true)
+                }
             }
         } catch (err) {
             setError('Bir hata oluştu')
@@ -154,89 +180,174 @@ export default function ReviewArticlePage({ params }: { params: { id: string } }
                 </div>
             </div>
 
-            {/* Review Form */}
-            <div className="card">
-                <h3 className="text-lg font-semibold mb-4">Değerlendirme Formu</h3>
-
-                {error && (
-                    <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Recommendation */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Öneriniz <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            value={formData.recommendation}
-                            onChange={(e) => setFormData({ ...formData, recommendation: e.target.value })}
-                            className="input"
-                            required
-                        >
-                            <option value="">Seçiniz</option>
-                            <option value="ACCEPT">Kabul Et</option>
-                            <option value="MINOR_REVISION">Küçük Revizyonla Kabul</option>
-                            <option value="MAJOR_REVISION">Büyük Revizyon Gerekli</option>
-                            <option value="REJECT">Reddet</option>
-                        </select>
-                    </div>
-
-                    {/* Public Comments */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Yazara İletilecek Görüşler <span className="text-red-500">*</span>
-                        </label>
-                        <textarea
-                            value={formData.comments}
-                            onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
-                            rows={6}
-                            className="input"
-                            placeholder="Makalenin güçlü ve zayıf yönlerini, iyileştirme önerilerinizi belirtin..."
-                            required
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                            Bu görüşler yazar ile paylaşılacaktır
-                        </p>
-                    </div>
-
-                    {/* Confidential Comments */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Editöre Özel Notlar (Opsiyonel)
-                        </label>
-                        <textarea
-                            value={formData.confidential}
-                            onChange={(e) => setFormData({ ...formData, confidential: e.target.value })}
-                            rows={4}
-                            className="input"
-                            placeholder="Sadece editör ile paylaşmak istediğiniz görüşler..."
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                            Bu notlar sadece editör tarafından görülecektir
-                        </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-4 pt-4 border-t">
+            {/* Completed Review Results */}
+            {review && review.status === 'COMPLETED' && !showForm && (
+                <div className="card mb-6">
+                    <div className="flex items-start justify-between mb-4">
+                        <h3 className="text-lg font-semibold">Değerlendirme Sonuçlarınız</h3>
                         <button
-                            type="submit"
-                            disabled={submitting}
-                            className="btn-primary flex-1"
+                            onClick={() => setShowForm(true)}
+                            className="btn-outline flex items-center gap-2"
                         >
-                            {submitting ? 'Gönderiliyor...' : 'Görüşü Gönder'}
+                            <RefreshCw className="w-4 h-4" />
+                            Yeniden Değerlendir
                         </button>
-                        <Link
-                            href="/dashboard/reviewer"
-                            className="btn-outline flex-1 text-center"
-                        >
-                            İptal
-                        </Link>
                     </div>
-                </form>
-            </div>
+
+                    <div className="space-y-4">
+                        {/* Recommendation */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Öneriniz
+                            </label>
+                            <div className="p-3 bg-gray-50 rounded-lg">
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${review.recommendation === 'ACCEPT' ? 'bg-green-100 text-green-800' :
+                                        review.recommendation === 'MINOR_REVISION' ? 'bg-yellow-100 text-yellow-800' :
+                                            review.recommendation === 'MAJOR_REVISION' ? 'bg-orange-100 text-orange-800' :
+                                                'bg-red-100 text-red-800'
+                                    }`}>
+                                    {review.recommendation === 'ACCEPT' ? 'Kabul Et' :
+                                        review.recommendation === 'MINOR_REVISION' ? 'Küçük Revizyonla Kabul' :
+                                            review.recommendation === 'MAJOR_REVISION' ? 'Büyük Revizyon Gerekli' :
+                                                'Reddet'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Public Comments */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Yazara İletilen Görüşler
+                            </label>
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                                <p className="text-gray-700 whitespace-pre-wrap">{review.comments || 'Yorum eklenmemiş'}</p>
+                            </div>
+                        </div>
+
+                        {/* Confidential Comments */}
+                        {review.confidentialComments && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Editöre Özel Notlar
+                                </label>
+                                <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                    <p className="text-gray-700 whitespace-pre-wrap">{review.confidentialComments}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Submission Date */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Gönderim Tarihi
+                            </label>
+                            <div className="p-3 bg-gray-50 rounded-lg">
+                                <p className="text-gray-700">
+                                    {review.submittedAt ? new Date(review.submittedAt).toLocaleString('tr-TR') : '-'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Review Form */}
+            {showForm && (
+                <div className="card">
+                    <div className="flex items-start justify-between mb-4">
+                        <h3 className="text-lg font-semibold">
+                            {review?.status === 'COMPLETED' ? 'Yeniden Değerlendirme' : 'Değerlendirme Formu'}
+                        </h3>
+                        {review?.status === 'COMPLETED' && (
+                            <button
+                                onClick={() => setShowForm(false)}
+                                className="text-sm text-gray-600 hover:text-gray-800"
+                            >
+                                İptal
+                            </button>
+                        )}
+                    </div>
+
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Recommendation */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Öneriniz <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                value={formData.recommendation}
+                                onChange={(e) => setFormData({ ...formData, recommendation: e.target.value })}
+                                className="input"
+                                required
+                            >
+                                <option value="">Seçiniz</option>
+                                <option value="ACCEPT">Kabul Et</option>
+                                <option value="MINOR_REVISION">Küçük Revizyonla Kabul</option>
+                                <option value="MAJOR_REVISION">Büyük Revizyon Gerekli</option>
+                                <option value="REJECT">Reddet</option>
+                            </select>
+                        </div>
+
+                        {/* Public Comments */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Yazara İletilecek Görüşler <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                value={formData.comments}
+                                onChange={(e) => setFormData({ ...formData, comments: e.target.value })}
+                                rows={6}
+                                className="input"
+                                placeholder="Makalenin güçlü ve zayıf yönlerini, iyileştirme önerilerinizi belirtin..."
+                                required
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Bu görüşler yazar ile paylaşılacaktır
+                            </p>
+                        </div>
+
+                        {/* Confidential Comments */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Editöre Özel Notlar (Opsiyonel)
+                            </label>
+                            <textarea
+                                value={formData.confidential}
+                                onChange={(e) => setFormData({ ...formData, confidential: e.target.value })}
+                                rows={4}
+                                className="input"
+                                placeholder="Sadece editör ile paylaşmak istediğiniz görüşler..."
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Bu notlar sadece editör tarafından görülecektır
+                            </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-4 pt-4 border-t">
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="btn-primary flex-1"
+                            >
+                                {submitting ? 'Gönderiliyor...' : 'Görüşü Gönder'}
+                            </button>
+                            <Link
+                                href="/dashboard/reviewer"
+                                className="btn-outline flex-1 text-center"
+                            >
+                                İptal
+                            </Link>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     )
 }
