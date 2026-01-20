@@ -44,3 +44,44 @@ export function reviewSubmittedEmail({ editor, article, recommendation }: any) {
         html: `<h2>Merhaba ${editor.name}</h2><p>Makale: ${article.title}</p><p>Oneri: ${recommendation}</p>`
     }
 }
+
+export function userApprovedEmail(user: any) {
+    return {
+        subject: 'Hesabınız Onaylandı - Tıp Dergisi',
+        html: `
+            <h2>Hesabınız Onaylandı!</h2>
+            <p>Merhaba ${user.name},</p>
+            <p>Tıp Dergisi hesabınız editör tarafından onaylandı. Artık sisteme giriş yapabilirsiniz.</p>
+            <p><a href="${process.env.NEXTAUTH_URL}/login">Giriş Yap</a></p>
+            <p>İyi çalışmalar dileriz!</p>
+        `
+    }
+}
+
+export function userRejectedEmail(user: any, reason?: string) {
+    return {
+        subject: 'Hesap Başvurunuz Hakkında - Tıp Dergisi',
+        html: `
+            <h2>Hesap Başvurunuz</h2>
+            <p>Merhaba ${user.name},</p>
+            <p>Tıp Dergisi hesap başvurunuz editör tarafından değerlendirildi.</p>
+            ${reason ? `<p><strong>Açıklama:</strong> ${reason}</p>` : ''}
+            <p>Daha fazla bilgi için lütfen bizimle iletişime geçin.</p>
+        `
+    }
+}
+
+export function newUserRegisteredEmail(user: any) {
+    return {
+        subject: 'Yeni Kullanıcı Kaydı - Tıp Dergisi',
+        html: `
+            <h2>Yeni Kullanıcı Kaydı</h2>
+            <p>Yeni bir kullanıcı sisteme kayıt oldu ve onayınızı bekliyor.</p>
+            <p><strong>İsim:</strong> ${user.name}</p>
+            <p><strong>E-posta:</strong> ${user.email}</p>
+            <p><strong>Rol:</strong> ${user.role === 'AUTHOR' ? 'Yazar' : 'Hakem'}</p>
+            <p><strong>Kurum:</strong> ${user.affiliation || 'Belirtilmemiş'}</p>
+            <p><a href="${process.env.NEXTAUTH_URL}/dashboard/editor/users">Kullanıcıyı İncele</a></p>
+        `
+    }
+}
