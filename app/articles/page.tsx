@@ -1,131 +1,68 @@
+import { requireRole } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import Link from 'next/link'
-import { Search, Download } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
-// Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
 export default async function ArticlesPage() {
-    const articles = await prisma.article.findMany({
+    const publishedArticles = await prisma.article.findMany({
         where: { status: 'PUBLISHED' },
-        include: { issue: true },
-        orderBy: { publishedAt: 'desc' },
+        include: { author: true },
+        orderBy: { publishedAt: 'desc' }
     })
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Navigation */}
-            <nav className="bg-white shadow-sm border-b">
-                <div className="container-custom py-4">
-                    <div className="flex items-center justify-between">
-                        <Link href="/" className="text-xl font-bold text-gray-900">
-                            Tıp Dergisi
-                        </Link>
-                        <div className="flex gap-4">
-                            <Link href="/articles" className="text-gray-700">
-                                Makaleler
-                            </Link>
-                            <Link href="/login" className="btn-primary">
-                                Giriş Yap
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
             <div className="container-custom py-12">
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">Yayınlanan Makaleler</h1>
-                    <p className="text-gray-600">
-                        Tıp dergimizde yayınlanan son makaleleri inceleyin ve PDF olarak indirin.
-                    </p>
+                <div className="mb-12">
+                    <Link
+                        href="/"
+                        className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Anasayfaya Dön
+                    </Link>
+                    <h1 className="text-4xl font-bold text-gray-900">Yayınlanan Makaleler</h1>
+                    <p className="text-gray-600 mt-2">Dergimizde yayınlanmış akademik makalelere göz atın</p>
                 </div>
 
-                {/* Search Bar */}
-                <div className="mb-8">
-                    <div className="relative max-w-2xl">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <input
-                            type="text"
-                            placeholder="Makale ara (başlık, anahtar kelime, yazar...)"
-                            className="input-field pl-10"
-                        />
-                    </div>
-                </div>
-
-                {/* Articles Grid */}
-                {articles.length === 0 ? (
-                    <div className="card text-center py-12">
-                        <p className="text-gray-600">Henüz yayınlanmış makale bulunmuyor.</p>
+                {publishedArticles.length === 0 ? (
+                    <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+                        <p className="text-gray-500">Henüz yayınlanmış makale bulunmamaktadır.</p>
                     </div>
                 ) : (
-                    <div className="grid gap-6">
-                        {articles.map((article) => (
-                            <div key={article.id} className="card hover:shadow-md transition-shadow">
-                                <div className="flex items-start justify-between gap-6">
-                                    <div className="flex-1">
-                                        <h2 className="text-2xl font-bold text-gray-900 mb-2">{article.title}</h2>
-
-                                        <p className="text-sm text-gray-600 mb-4">
-                                            {article.authors.join(', ')}
-                                        </p>
-
-                                        <p className="text-gray-700 mb-4 line-clamp-3">{article.abstract}</p>
-
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            {article.keywords.map((keyword, i) => (
-                                                <span key={i} className="badge bg-blue-100 text-blue-800">
-                                                    {keyword}
-                                                </span>
-                                            ))}
-                                        </div>
-
-                                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                                            {article.issue && (
-                                                <span>
-                                                    Cilt {article.issue.volume}, Sayı {article.issue.number} ({article.issue.year})
-                                                </span>
-                                            )}
-                                            {article.publishedAt && (
-                                                <span>
-                                                    Yayın: {new Date(article.publishedAt).toLocaleDateString('tr-TR')}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-2">
-                                        <Link
-                                            href={`/articles/${article.id}`}
-                                            className="btn-primary whitespace-nowrap"
-                                        >
-                                            Detay
-                                        </Link>
-                                        {article.pdfUrl && (
-                                            <a
-                                                href={article.pdfUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="btn-outline flex items-center gap-2 whitespace-nowrap"
-                                            >
-                                                <Download className="w-4 h-4" />
-                                                PDF İndir
-                                            </a>
-                                        )}
-                                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {publishedArticles.map((article) => (
+                            <Link
+                                key={article.id}
+                                href={`/articles/${article.id}`}
+                                className="article-card group"
+                            >
+                                <div className="flex justify-between items-start mb-3">
+                                    <span className="badge badge-category">{article.keywords[0] || 'Genel'}</span>
+                                    <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                                        Yayınlandı
+                                    </span>
                                 </div>
-                            </div>
+
+                                <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2">
+                                    {article.title}
+                                </h3>
+
+                                <p className="text-gray-500 text-sm mb-4 line-clamp-2">
+                                    {article.abstract}
+                                </p>
+
+                                <div className="flex items-center justify-between text-xs text-gray-400 mt-auto pt-3 border-t border-gray-100">
+                                    <span>{article.author.name}</span>
+                                    <span>{new Date(article.publishedAt || article.createdAt).toLocaleDateString('tr-TR')}</span>
+                                </div>
+                            </Link>
                         ))}
                     </div>
                 )}
             </div>
-
-            {/* Footer */}
-            <footer className="bg-gray-100 border-t mt-20">
-                <div className="container-custom py-8">
-                    <p className="text-center text-gray-600">© 2024 Tıp Dergisi. Tüm hakları saklıdır.</p>
-                </div>
-            </footer>
         </div>
     )
 }

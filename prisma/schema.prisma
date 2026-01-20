@@ -75,6 +75,7 @@ model Article {
   pdfUrl        String?
   pdfKey        String?        // UploadThing file key
   status        ArticleStatus  @default(SUBMITTED)
+  editorFeedback String?
   submittedAt   DateTime       @default(now())
   publishedAt   DateTime?
   issueId       String?

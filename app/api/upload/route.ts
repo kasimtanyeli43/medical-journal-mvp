@@ -18,6 +18,20 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 })
         }
 
+        // Validate file type
+        const allowedTypes = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]
+
+        if (!allowedTypes.includes(file.type)) {
+            return NextResponse.json(
+                { error: 'Invalid file type. Only PDF, DOC, and DOCX files are allowed.' },
+                { status: 400 }
+            )
+        }
+
         // Upload to Vercel Blob
         const blob = await put(file.name, file, {
             access: 'public',
