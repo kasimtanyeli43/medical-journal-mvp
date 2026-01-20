@@ -145,7 +145,7 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
                                     className="w-full btn-primary flex items-center justify-center gap-2 mb-3"
                                 >
                                     <Download className="w-4 h-4" />
-                                    PDF İndir
+                                    Makaleyi İndir
                                 </a>
                             ) : (
                                 <div className="text-sm text-gray-500 mb-3 text-center p-3 bg-gray-50 rounded">
