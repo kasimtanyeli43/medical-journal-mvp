@@ -133,15 +133,15 @@ export default function HomePage() {
                             © 2024 Tıp Dergisi. Bilimsel yayıncılıkta güvenilir adres.
                         </p>
                     </div>
-                    <div className="text-center pt-4 border-t border-gray-800">
-                        <p className="text-xs text-gray-500 font-light tracking-wide flex items-center justify-center gap-2">
-                            Designed by
+                    <div className="text-center pt-6 border-t border-gray-800">
+                        <div className={`${playfair.className} text-sm text-gray-400 font-light tracking-wider flex items-center justify-center gap-3`}>
+                            <span className="italic">Designed by</span>
                             <img
                                 src="/kasim-logo.png"
                                 alt="Kasım Tanyeli"
-                                className="h-4 inline-block opacity-70 hover:opacity-100 transition-opacity"
+                                className="h-8 inline-block opacity-80 hover:opacity-100 transition-opacity"
                             />
-                        </p>
+                        </div>
                     </div>
                 </div>
             </footer>
