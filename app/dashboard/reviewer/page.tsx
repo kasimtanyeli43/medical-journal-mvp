@@ -8,6 +8,17 @@ import { ArticleCard } from '@/components/ui/ArticleCard'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
+// Helper function to translate recommendation to Turkish
+function translateRecommendation(recommendation: string | null): string {
+    const translations: Record<string, string> = {
+        'ACCEPT': 'Kabul',
+        'REJECT': 'Reddet',
+        'MINOR_REVISION': 'Minör Revizyon',
+        'MAJOR_REVISION': 'Majör Revizyon',
+    }
+    return recommendation ? translations[recommendation] || recommendation : 'Tamamlandı'
+}
+
 export default async function ReviewerDashboard() {
     const user = await requireRole(['REVIEWER'])
 
@@ -104,9 +115,10 @@ export default async function ReviewerDashboard() {
                                 title={review.article.title}
                                 author={review.article.author.name || 'Unknown'}
                                 date={review.submittedAt ? new Date(review.submittedAt).toISOString() : new Date().toISOString()}
-                                status={review.recommendation || 'COMPLETED'}
+                                status={translateRecommendation(review.recommendation)}
                                 category="Tamamlandı"
                                 showStatus={true}
+                                href={`/dashboard/reviewer/review/${review.article.id}`}
                             />
                         ))}
                     </div>

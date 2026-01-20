@@ -49,8 +49,11 @@ export function ArticleCard({
         if (status === 'PUBLISHED' || statusLower.includes('yayınlandı')) {
             return 'bg-purple-100 text-purple-800'
         }
-        if (status === 'REVISION_REQUESTED' || statusLower.includes('revizyon')) {
+        if (status === 'REVISION_REQUESTED' || statusLower.includes('revizyon') || statusLower.includes('minör') || statusLower.includes('majör')) {
             return 'bg-orange-100 text-orange-800'
+        }
+        if (statusLower.includes('tamamlandı') || statusLower.includes('completed')) {
+            return 'bg-blue-100 text-blue-800'
         }
 
         return 'bg-gray-100 text-gray-800'
