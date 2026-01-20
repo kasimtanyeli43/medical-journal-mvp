@@ -8,6 +8,18 @@ import { ArticleCard } from '@/components/ui/ArticleCard'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
+function getStatusText(status: string) {
+    const texts: Record<string, string> = {
+        SUBMITTED: 'Gönderildi',
+        UNDER_REVIEW: 'İnceleniyor',
+        ACCEPTED: 'Kabul Edildi',
+        REJECTED: 'Reddedildi',
+        PUBLISHED: 'Yayınlandı',
+        REVISION_REQUESTED: 'Revizyon İstendi',
+    }
+    return texts[status] || status
+}
+
 export default async function AuthorDashboard() {
     const user = await requireRole(['AUTHOR'])
 
@@ -101,7 +113,7 @@ export default async function AuthorDashboard() {
                                 abstract={article.abstract}
                                 author={user.name || 'Ben'}
                                 date={article.submittedAt.toISOString()}
-                                status={article.status}
+                                status={getStatusText(article.status)}
                                 category={article.keywords[0] || 'Genel Tıp'}
                                 href={`/articles/${article.id}`}
                             />
