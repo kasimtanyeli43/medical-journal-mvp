@@ -146,3 +146,33 @@ export async function POST(
         )
     }
 }
+
+// GET - Get current user's review for this article
+export async function GET(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const session = await getServerSession(authOptions)
+
+        if (!session || session.user.role !== 'REVIEWER') {
+            return NextResponse.json(
+                { error: 'Unauthorized - Only reviewers can access reviews' },
+                { status: 401 }
+            )
+        }
+
+        // Find the review for this article by this reviewer
+        const review = await prisma.review.findFirst({
+            where: {
+                articleId: params.id,
+                reviewerId: session.user.id
+            }
+        })
+
+        return NextResponse.json({ review }, { status: 200 })
+    } catch (error: any) {
+        console.error('Error fetching review:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+}
