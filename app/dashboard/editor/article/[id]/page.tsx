@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { EditorFeedbackForm } from '@/components/EditorFeedbackForm'
 import { prisma } from '@/lib/db'
 import { requireRole } from '@/lib/auth'
 import Link from 'next/link'
@@ -148,6 +149,13 @@ export default async function EditorArticleDetailPage({ params }: { params: { id
                                 )}
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Editor Feedback Form */}
+                {(article.status === 'ACCEPTED' || article.status === 'REVISION_REQUESTED') && (
+                    <div className="mt-8 pt-8 border-t">
+                        <EditorFeedbackForm articleId={article.id} />
                     </div>
                 )}
             </div>

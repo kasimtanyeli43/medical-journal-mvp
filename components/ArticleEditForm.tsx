@@ -200,11 +200,11 @@ export function ArticleEditForm({ article }: ArticleEditFormProps) {
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 transition-colors bg-gray-50">
                         <input
                             type="file"
-                            accept=".pdf"
+                            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                             onChange={handleFileChange}
                             className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         />
-                        <p className="text-xs text-gray-500 mt-2">Maksimum 10MB. Sadece PDF.</p>
+                        <p className="text-xs text-gray-500 mt-2">Maksimum 10MB. PDF, DOC veya DOCX.</p>
                         {uploadError && <p className="text-sm text-red-600 mt-2">{uploadError}</p>}
                     </div>
                 )}
