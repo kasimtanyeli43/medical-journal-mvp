@@ -184,6 +184,23 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
                                 )}
                             </div>
                         </div>
+
+                        {/* Document Viewer */}
+                        {article.pdfUrl && (
+                            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                                <h3 className="font-bold text-gray-900 mb-4">Makaleyi Oku</h3>
+                                <div className="bg-gray-100 rounded-lg overflow-hidden border border-gray-300" style={{ height: '600px' }}>
+                                    <iframe
+                                        src={`https://docs.google.com/viewer?url=${encodeURIComponent(article.pdfUrl)}&embedded=true`}
+                                        className="w-full h-full border-0"
+                                        title={article.title}
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-500 mt-2">
+                                    Dosya görüntülenemiyorsa "PDF İndir" butonunu kullanın.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
