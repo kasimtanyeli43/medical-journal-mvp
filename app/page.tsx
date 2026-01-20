@@ -135,8 +135,8 @@ export default function HomePage() {
                     </div>
                     <div className="text-center pt-8 pb-6 border-t border-gray-800">
                         <div className={`${playfair.className} flex items-center justify-center gap-3 tracking-wide`}>
-                            <span className="italic text-gray-400 font-light text-lg">Designed by</span>
-                            <span className="font-bold text-2xl bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent drop-shadow-sm hover:from-fuchsia-300 hover:to-purple-300 transition-all duration-300">
+                            <span className="italic text-gray-600 font-medium text-lg">Designed by</span>
+                            <span className="italic font-bold text-2xl bg-gradient-to-r from-fuchsia-600 to-purple-600 bg-clip-text text-transparent drop-shadow-sm hover:from-fuchsia-500 hover:to-purple-500 transition-all duration-300">
                                 Kasım TANYELİ
                             </span>
                         </div>
