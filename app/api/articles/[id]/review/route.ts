@@ -83,11 +83,22 @@ export async function POST(
             })
         }
 
-        // Update article status to show review is completed
+        // Map reviewer recommendation to article status
+        let newArticleStatus: 'ACCEPTED' | 'REJECTED' | 'REVISION_REQUESTED' | 'UNDER_REVIEW' = 'UNDER_REVIEW'
+
+        if (recommendation === 'ACCEPT') {
+            newArticleStatus = 'ACCEPTED'
+        } else if (recommendation === 'REJECT') {
+            newArticleStatus = 'REJECTED'
+        } else if (recommendation === 'MAJOR_REVISION' || recommendation === 'MINOR_REVISION') {
+            newArticleStatus = 'REVISION_REQUESTED'
+        }
+
+        // Update article status based on reviewer decision
         await prisma.article.update({
             where: { id: params.id },
             data: {
-                status: 'UNDER_REVIEW' // Keep as UNDER_REVIEW, editor will make final decision
+                status: newArticleStatus
             }
         })
 
