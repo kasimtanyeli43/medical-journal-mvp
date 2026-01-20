@@ -78,6 +78,31 @@ export function UserManagementClient({ initialUsers }: { initialUsers: any[] }) 
         }
     }
 
+    const handleDelete = async (userId: string, userName: string) => {
+        if (!confirm(`${userName} kullanıcısını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
+            return
+        }
+
+        setLoading(userId)
+        try {
+            const res = await fetch(`/api/users/${userId}/delete`, {
+                method: 'DELETE'
+            })
+            if (res.ok) {
+                router.refresh()
+                alert('Kullanıcı başarıyla silindi')
+            } else {
+                const data = await res.json()
+                alert(data.error || 'Silme başarısız oldu')
+            }
+        } catch (error) {
+            console.error(error)
+            alert('Bir hata oluştu')
+        } finally {
+            setLoading(null)
+        }
+    }
+
     const pendingUsers = initialUsers.filter(u => u.approvalStatus === 'PENDING')
     const approvedUsers = initialUsers.filter(u => u.approvalStatus === 'APPROVED')
     const rejectedUsers = initialUsers.filter(u => u.approvalStatus === 'REJECTED')
@@ -194,6 +219,7 @@ export function UserManagementClient({ initialUsers }: { initialUsers: any[] }) 
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rol</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Durum</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarih</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">İşlem</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
@@ -205,6 +231,15 @@ export function UserManagementClient({ initialUsers }: { initialUsers: any[] }) 
                                     <td className="px-6 py-4 text-sm">{getStatusBadge(user.approvalStatus)}</td>
                                     <td className="px-6 py-4 text-sm text-gray-500">
                                         {new Date(user.createdAt).toLocaleDateString('tr-TR')}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm">
+                                        <button
+                                            onClick={() => handleDelete(user.id, user.name)}
+                                            disabled={loading === user.id}
+                                            className="text-red-600 hover:text-red-800 font-medium disabled:opacity-50"
+                                        >
+                                            Sil
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
