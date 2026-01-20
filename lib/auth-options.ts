@@ -34,6 +34,14 @@ export const authOptions: NextAuthOptions = {
                     return null
                 }
 
+                // Check approval status
+                if (user.approvalStatus !== 'APPROVED') {
+                    if (user.approvalStatus === 'REJECTED') {
+                        throw new Error('Hesabınız reddedilmiştir. Lütfen yönetici ile iletişime geçin.')
+                    }
+                    throw new Error('Hesabınız henüz onaylanmamıştır. Editör onayını bekleyiniz.')
+                }
+
                 return {
                     id: user.id,
                     email: user.email,

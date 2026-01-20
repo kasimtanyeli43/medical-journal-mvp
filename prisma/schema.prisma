@@ -10,6 +10,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum UserRole {
   AUTHOR
   EDITOR
@@ -43,6 +49,7 @@ model User {
   password      String
   name          String
   role          UserRole
+  approvalStatus ApprovalStatus  @default(PENDING)
   affiliation   String?
   bio           String?
   createdAt     DateTime  @default(now())
