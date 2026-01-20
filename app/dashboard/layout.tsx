@@ -28,7 +28,6 @@ export default function DashboardLayout({
         REVIEWER: [
             { name: 'Dashboard', href: '/dashboard/reviewer', icon: Home },
             { name: 'Atanan Makaleler', href: '/dashboard/reviewer', icon: FileText },
-            { name: 'Tamamlananlar', href: '/dashboard/reviewer/completed', icon: CheckCircle },
         ],
     }
 
