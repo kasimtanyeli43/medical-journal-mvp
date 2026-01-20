@@ -26,7 +26,12 @@ export default function LoginPage() {
             })
 
             if (result?.error) {
-                setError('Email veya şifre hatalı')
+                // Check if error is about approval status
+                if (result.error.includes('onaylanmamıştır') || result.error.includes('reddedilmiş')) {
+                    setError(result.error)
+                } else {
+                    setError('Email veya şifre hatalı')
+                }
                 setLoading(false)
                 return
             }
@@ -106,15 +111,6 @@ export default function LoginPage() {
                         <Link href="/register" className="text-primary-600 hover:text-primary-700 font-medium">
                             Kayıt Olun
                         </Link>
-                    </div>
-
-                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Demo Hesapları:</p>
-                        <div className="text-xs text-gray-600 space-y-1">
-                            <p>Yazar: author@demo.com / demo123</p>
-                            <p>Editör: editor@demo.com / demo123</p>
-                            <p>Hakem: reviewer@demo.com / demo123</p>
-                        </div>
                     </div>
                 </div>
             </div>
