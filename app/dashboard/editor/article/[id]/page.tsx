@@ -121,7 +121,7 @@ export default async function EditorArticleDetailPage({ params }: { params: { id
                             className="btn-primary inline-flex items-center gap-2"
                         >
                             <Download className="w-4 h-4" />
-                            PDF İndir
+                            Makaleyi İndir
                         </a>
                     </div>
                 )}

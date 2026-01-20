@@ -132,7 +132,7 @@ export default function ReviewArticlePage({ params }: { params: { id: string } }
                             className="btn-outline flex items-center gap-2"
                         >
                             <Download className="w-4 h-4" />
-                            PDF İndir
+                            Makaleyi İndir
                         </a>
                     )}
                 </div>
