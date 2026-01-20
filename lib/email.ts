@@ -148,3 +148,12 @@ export function reviewerAssignedEmail({ reviewer, article, author }: { reviewer:
     html: `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;"><h2 style="color: #2563eb;">Merhaba ,</h2><p>Size bir makale inceleme talebi atandý:</p><div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;"><h3 style="margin-top: 0;"></h3><p><strong>Yazar:</strong> </p></div><p>Lütfen sisteme giriþ yaparak makalenizi inceleyin:</p><a href="/dashboard/reviewer" style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Ýncele</a></div>`
   }
 }
+
+
+export function reviewSubmittedEmail({ editor, article, reviewer, recommendation }: { editor: any; article: any; reviewer: any; recommendation: string }) {
+  const recText = { ACCEPT: 'Kabul', REJECT: 'Red', MINOR_REVISION: 'Küçük Revizyon', MAJOR_REVISION: 'Büyük Revizyon' }[recommendation] || recommendation;
+  return {
+    subject: 'Hakem Görüþü Alýndý',
+    html: `<div style="font-family: Arial, sans-serif;"><h2>Merhaba ,</h2><p>Bir makale için hakem görüþü gönderildi:</p><div style="background: #f3f4f6; padding: 20px; border-radius: 8px;"><h3></h3><p><strong>Hakem Önerisi:</strong> </p></div><a href="/dashboard/editor/article/" style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Görüntüle</a></div>`
+  }
+}
