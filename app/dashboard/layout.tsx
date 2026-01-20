@@ -23,6 +23,7 @@ export default function DashboardLayout({
             { name: 'Dashboard', href: '/dashboard/editor', icon: Home },
             { name: 'Tüm Makaleler', href: '/dashboard/editor', icon: FileText },
             { name: 'Hakemler', href: '/dashboard/editor/reviewers', icon: Users },
+            { name: 'Kullanıcı Yönetimi', href: '/dashboard/editor/users', icon: Users },
         ],
         REVIEWER: [
             { name: 'Dashboard', href: '/dashboard/reviewer', icon: Home },
