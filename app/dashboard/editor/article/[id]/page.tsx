@@ -6,6 +6,28 @@ import { ArrowLeft, Download, User, Calendar, FileText } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
+function getStatusText(status: string) {
+    const texts: Record<string, string> = {
+        SUBMITTED: 'Gönderildi',
+        UNDER_REVIEW: 'İnceleniyor',
+        ACCEPTED: 'Kabul Edildi',
+        REJECTED: 'Reddedildi',
+        PUBLISHED: 'Yayınlandı',
+        REVISION_REQUESTED: 'Revizyon İstendi',
+    }
+    return texts[status] || status
+}
+
+function getRecommendationText(recommendation: string) {
+    const texts: Record<string, string> = {
+        ACCEPT: 'Kabul Et',
+        REJECT: 'Reddet',
+        MAJOR_REVISION: 'Büyük Revizyon',
+        MINOR_REVISION: 'Küçük Revizyon',
+    }
+    return texts[recommendation] || recommendation
+}
+
 export default async function EditorArticleDetailPage({ params }: { params: { id: string } }) {
     await requireRole(['EDITOR'])
 
@@ -41,12 +63,12 @@ export default async function EditorArticleDetailPage({ params }: { params: { id
                 <div className="mb-6">
                     <div className="flex items-center gap-3 mb-4">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${article.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-800' :
-                                article.status === 'UNDER_REVIEW' ? 'bg-yellow-100 text-yellow-800' :
-                                    article.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
-                                        article.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                                            'bg-gray-100 text-gray-800'
+                            article.status === 'UNDER_REVIEW' ? 'bg-yellow-100 text-yellow-800' :
+                                article.status === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
+                                    article.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                                        'bg-gray-100 text-gray-800'
                             }`}>
-                            {article.status}
+                            {getStatusText(article.status)}
                         </span>
                     </div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>
@@ -118,7 +140,7 @@ export default async function EditorArticleDetailPage({ params }: { params: { id
                                 </div>
                                 {review.recommendation && (
                                     <p className="text-sm text-gray-600 mb-2">
-                                        <strong>Öneri:</strong> {review.recommendation}
+                                        <strong>Öneri:</strong> {getRecommendationText(review.recommendation)}
                                     </p>
                                 )}
                                 {review.comments && (

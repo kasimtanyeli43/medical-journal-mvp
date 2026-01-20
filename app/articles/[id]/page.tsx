@@ -8,6 +8,28 @@ import { ArrowLeft, Download, FileText, Calendar, User, Tag } from 'lucide-react
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
+function getStatusText(status: string) {
+    const texts: Record<string, string> = {
+        SUBMITTED: 'Gönderildi',
+        UNDER_REVIEW: 'İnceleniyor',
+        ACCEPTED: 'Kabul Edildi',
+        REJECTED: 'Reddedildi',
+        PUBLISHED: 'Yayınlandı',
+        REVISION_REQUESTED: 'Revizyon İstendi',
+    }
+    return texts[status] || status
+}
+
+function getRecommendationText(recommendation: string) {
+    const texts: Record<string, string> = {
+        ACCEPT: 'Kabul Et',
+        REJECT: 'Reddet',
+        MAJOR_REVISION: 'Büyük Revizyon',
+        MINOR_REVISION: 'Küçük Revizyon',
+    }
+    return texts[recommendation] || recommendation
+}
+
 export default async function ArticleDetailPage({ params }: { params: { id: string } }) {
     const session = await getServerSession(authOptions)
 
@@ -57,7 +79,7 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
 
                     <div className="flex flex-wrap gap-2 mb-4">
                         <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                            {article.status.replace('_', ' ')}
+                            {getStatusText(article.status)}
                         </span>
                         {article.issue && (
                             <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
@@ -152,7 +174,7 @@ export default async function ArticleDetailPage({ params }: { params: { id: stri
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Durum</span>
-                                    <span className="font-medium text-gray-900">{article.status}</span>
+                                    <span className="font-medium text-gray-900">{getStatusText(article.status)}</span>
                                 </div>
                                 {article.reviewer && (isEditor || isAuthor) && (
                                     <div className="flex justify-between">
